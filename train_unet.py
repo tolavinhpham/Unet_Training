@@ -50,8 +50,8 @@ X_test = np.zeros((len(test_ids), IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS), dtype=np
 sizes_test = []
 print('Resizing test images') 
 for n, id_ in tqdm(enumerate(test_ids), total=len(test_ids)):
-    path = TEST_PATH + id_
-    img = imread(path + '/images/' + id_ + '.png')[:,:,:IMG_CHANNELS]
+    path = TEST_PATH
+    img = imread(path + '/' + id_ + '.png')[:,:,:IMG_CHANNELS]
     sizes_test.append([img.shape[0], img.shape[1]])
     img = resize(img, (IMG_HEIGHT, IMG_WIDTH), mode='constant', preserve_range=True)
     X_test[n] = img
@@ -64,10 +64,6 @@ print('Done!')
 # plt.show()
 # imshow(np.squeeze(Y_train[image_x]))
 # plt.show()
-
-
-print("Shape of X_test:", X_test.shape)
-# Print the shape of a sample training image (assuming you have access to one)
 
 
 #Build the model
@@ -140,7 +136,7 @@ callbacks = [
         kr.callbacks.EarlyStopping(patience=2, monitor='val_loss'),
         kr.callbacks.TensorBoard(log_dir='logs')]
 
-results = model.fit(X_train, Y_train, validation_split=0.1, batch_size=16, epochs=25, callbacks=callbacks)
+results = model.fit(X_train, Y_train, validation_split=0.1, batch_size=16, epochs=5, callbacks=callbacks)
 
 ####################################
 
@@ -158,7 +154,12 @@ preds_test_t = (preds_test > 0.5).astype(np.uint8)
 
 
 # Perform a sanity check on some random training samples
-ix = random.randint(0, len(preds_train_t))
+# ix = random.randint(0, len(preds_train_t))
+ix = 0
+
+imshow(np.squeeze(preds_test_t[ix]))
+plt.show()
+
 imshow(X_train[ix])
 plt.show()
 imshow(np.squeeze(Y_train[ix]))
@@ -167,7 +168,8 @@ imshow(np.squeeze(preds_train_t[ix]))
 plt.show()
 
 # Perform a sanity check on some random validation samples
-ix = random.randint(0, len(preds_val_t))
+# ix = random.randint(0, len(preds_val_t))
+ix = 0
 imshow(X_train[int(X_train.shape[0]*0.9):][ix])
 plt.show()
 imshow(np.squeeze(Y_train[int(Y_train.shape[0]*0.9):][ix]))
@@ -175,3 +177,25 @@ plt.show()
 imshow(np.squeeze(preds_val_t[ix]))
 plt.show()
 
+
+# Print kernel
+# for i, layer in enumerate(model.layers):
+#     if hasattr(layer, 'kernel'):
+#         weights, biases = layer.get_weights()
+#         print(f"Convolutional Layer {i+1}:")
+#         print(f"Weights shape: {weights.shape}")
+#         num_kernels = weights.shape[-1]
+
+#         rows = int(np.sqrt(num_kernels))
+#         cols = int(np.ceil(num_kernels / rows))
+
+#         for j in range(num_kernels):
+#             for k in range(weights.shape[-1]):  
+#                 filter_img = np.mean(weights[:, :, :, j], axis=2)
+#                 plt.subplot(rows, cols, j + 1)
+#             plt.imshow(filter_img, cmap='gray')
+#             plt.axis('off')
+#             print(layer.kernel.numpy())
+
+#     else:
+#         print(f'Layer {i+1} is an InputLayer and does not have weights.')
